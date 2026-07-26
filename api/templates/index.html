@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Congestion Prediction System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/premium-features.css">
+    <style>
+        /* Homepage specific styles */
+        .hero { min-height: 92vh; display: flex; align-items: center; position: relative; z-index: 1; padding: 6rem 0 4rem; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.2); padding: 0.5rem 1rem; border-radius: 100px; font-size: 0.875rem; color: var(--primary); margin-bottom: 1.5rem; }
+        .hero-title { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+        .hero-title .gradient-text { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: 1.125rem; color: var(--text-muted); max-width: 600px; line-height: 1.7; margin-bottom: 2rem; }
+        .btn-primary-glow { background: linear-gradient(135deg, var(--primary), #1d4ed8); color: white; border: none; padding: 1rem 2rem; border-radius: 12px; font-weight: 600; font-size: 1.1rem; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3); }
+        .btn-primary-glow:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4); color: white; }
+        .btn-outline-light { border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 1rem 2rem; border-radius: 12px; font-weight: 600; transition: all 0.3s ease; display: inline-block; }
+        .btn-outline-light:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.3); color: white; }
+        .hero-robot-icon { font-size: 10rem; opacity: 0.08; position: relative; }
+        .hero-robot-icon .fa-robot { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; opacity: 1; color: var(--primary); }
+        .home-stats-section { position: relative; z-index: 1; padding: 2rem 0 4rem; }
+        .home-stat-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 2rem; text-align: center; transition: all 0.3s ease; }
+        .home-stat-card:hover { transform: translateY(-5px); border-color: rgba(37, 99, 235, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        .home-stat-icon { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; }
+        .home-stat-number { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .home-stat-label { color: var(--text-muted); font-size: 0.9rem; }
+        .premium-section-title { text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .premium-section-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 3rem; }
+        .home-feature-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 2rem; transition: all 0.3s ease; height: 100%; }
+        .home-feature-card:hover { transform: translateY(-5px); border-color: rgba(37, 99, 235, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .home-feature-icon { font-size: 2rem; margin-bottom: 1rem; }
+        .tech-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); padding: 0.75rem 1.5rem; border-radius: 12px; margin: 0.5rem; font-weight: 500; transition: all 0.3s ease; }
+        .tech-badge:hover { border-color: rgba(37, 99, 235, 0.3); transform: translateY(-2px); }
+        .nice-footer { background: var(--dark); border-top: 1px solid rgba(255,255,255,0.05); padding: 2rem 0; position: relative; z-index: 1; }
+
+        /* Premium widget area */
+        .premium-widgets-area { position: relative; z-index: 1; padding: 2rem 0; }
+        .widget-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 1.5rem; height: 100%; transition: var(--transition-normal); }
+        .widget-card:hover { transform: translateY(-3px); border-color: rgba(37, 99, 235, 0.2); box-shadow: var(--shadow-glow); }
+        .widget-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .model-status-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .model-status-item:last-child { border-bottom: none; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-dot.active { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); animation: livePulse 2s infinite; }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .trend-badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.75rem; font-weight: 500; }
+        .trend-up { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .trend-down { background: rgba(16,185,129,0.15); color: #10b981; }
+        .trend-stable { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .hero { min-height: auto; padding: 5rem 0 2rem; }
+            .home-stat-number { font-size: 2rem; }
+            .premium-section-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-particles"></div>
+    <div id="particlesBg" class="particles-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-traffic-light"></i> TrafficAI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/predict"><i class="fas fa-robot"></i> Predict</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/advanced"><i class="fas fa-crown"></i> Advanced</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <div class="hero-badge animate-in">
+                        <i class="fas fa-microchip"></i>
+                        Powered by AI & Machine Learning
+                    </div>
+                    <h1 class="hero-title animate-in">
+                        Traffic Congestion<br>
+                        <span class="gradient-text">Prediction System</span>
+                    </h1>
+                    <p class="hero-subtitle animate-in">
+                        Advanced AI-powered platform that predicts traffic congestion levels using 
+                        machine learning algorithms. Leverage Random Forest, XGBoost, and LSTM 
+                        models for accurate real-time congestion forecasting.
+                    </p>
+                    <div class="animate-in" style="display:flex;gap:1rem;flex-wrap:wrap;">
+                        <a href="/predict" class="btn btn-primary-glow">
+                            <i class="fas fa-brain me-2"></i>Try Prediction
+                        </a>
+                        <a href="/dashboard" class="btn btn-outline-light">
+                            <i class="fas fa-chart-bar me-2"></i>View Dashboard
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 text-center animate-in">
+                    <div class="hero-robot-icon">
+                        <i class="fas fa-traffic-light"></i>
+                        <i class="fas fa-robot"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Widgets Row -->
+    <section class="premium-widgets-area">
+        <div class="container">
+            <div class="row g-3">
+                <!-- Live Clock Widget -->
+                <div class="col-md-3">
+                    <div class="widget-card text-center">
+                        <div class="widget-title"><i class="far fa-clock text-primary"></i>Live Clock</div>
+                        <div class="live-time" id="liveTime">--:--:--</div>
+                        <div class="live-date" id="liveDate">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Current Congestion Gauge -->
+                <div class="col-md-3">
+                    <div class="widget-card text-center">
+                        <div class="widget-title"><i class="fas fa-tachometer-alt text-warning"></i>Current Congestion</div>
+                        <div class="gauge-container mx-auto">
+                            <div class="gauge-bg"></div>
+                            <div class="gauge-fill" id="gaugeFill" style="clip-path: polygon(50% 100%, 0 100%, 0 70%, 100% 70%, 100% 100%);"></div>
+                            <div class="gauge-needle" id="gaugeNeedle" style="transform: translateX(-50%) rotate(-90deg);"></div>
+                            <div class="gauge-center"></div>
+                        </div>
+                        <div class="gauge-value" id="gaugeValue" style="color: #10b981;">--</div>
+                        <div class="gauge-label" id="gaugeLabel">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Model Status -->
+                <div class="col-md-3">
+                    <div class="widget-card">
+                        <div class="widget-title"><i class="fas fa-microchip text-success"></i>ML Models</div>
+                        <div id="modelStatusList">
+                            <div class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2"></div>Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Traffic Alert Ticker -->
+                <div class="col-md-3">
+                    <div class="widget-card">
+                        <div class="widget-title"><i class="fas fa-bullhorn text-danger"></i>Traffic Alerts</div>
+                        <div class="alert-ticker">
+                            <div class="alert-ticker-icon" style="background: rgba(239,68,68,0.15); color: #ef4444;">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="ticker-content">
+                                <div class="ticker-text" id="tickerText">Loading traffic alerts...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="home-stats-section">
+        <div class="container">
+            <div class="row g-4" id="homeStats">
+                <div class="col-md-3">
+                    <div class="home-stat-card animate-in">
+                        <div class="home-stat-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-database"></i></div>
+                        <div class="home-stat-number"><span class="count-up" data-target="10000">10K</span>+</div>
+                        <div class="home-stat-label">Data Samples</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="home-stat-card animate-in">
+                        <div class="home-stat-icon bg-success bg-opacity-10 text-success"><i class="fas fa-microchip"></i></div>
+                        <div class="home-stat-number">4</div>
+                        <div class="home-stat-label">ML Models</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="home-stat-card animate-in">
+                        <div class="home-stat-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="home-stat-number"><span id="locationCount">12</span></div>
+                        <div class="home-stat-label">Locations</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="home-stat-card animate-in">
+                        <div class="home-stat-icon bg-info bg-opacity-10 text-info"><i class="fas fa-chart-line"></i></div>
+                        <div class="home-stat-number"><span id="accuracyDisplay">94</span>%</div>
+                        <div class="home-stat-label">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" style="position:relative;z-index:1;padding:4rem 0;">
+        <div class="container">
+            <h2 class="premium-section-title">Key Features</h2>
+            <p class="premium-section-subtitle">Powered by cutting-edge AI and machine learning technology</p>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="home-feature-card">
+                        <div class="home-feature-icon">🤖</div>
+                        <h3 style="font-size:1.2rem;font-weight:600;margin-bottom:0.75rem;">Multiple ML Models</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">Random Forest, XGBoost, LSTM Neural Networks, and Linear Regression for robust predictions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="home-feature-card">
+                        <div class="home-feature-icon">📊</div>
+                        <h3 style="font-size:1.2rem;font-weight:600;margin-bottom:0.75rem;">Interactive Dashboard</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">Real-time visualizations with congestion heatmaps, time series, and weather impact analysis.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="home-feature-card">
+                        <div class="home-feature-icon">🌤️</div>
+                        <h3 style="font-size:1.2rem;font-weight:600;margin-bottom:0.75rem;">Weather Integration</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">Incorporates temperature, precipitation, humidity, and wind speed for accurate predictions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="home-feature-card">
+                        <div class="home-feature-icon">⏰</div>
+                        <h3 style="font-size:1.2rem;font-weight:600;margin-bottom:0.75rem;">Time-Aware Analysis</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">Considers rush hours, weekends, holidays, and seasonal patterns in predictions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="home-feature-card">
+                        <div class="home-feature-icon">🎯</div>
+                        <h3 style="font-size:1.2rem;font-weight:600;margin-bottom:0.75rem;">Ensemble Predictions</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">Weighted ensemble combining all models for improved accuracy and reliability.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="home-feature-card">
+                        <div class="home-feature-icon">🔌</div>
+                        <h3 style="font-size:1.2rem;font-weight:600;margin-bottom:0.75rem;">REST API</h3>
+                        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;">Easy integration with other applications via RESTful API endpoints.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Stack -->
+    <section class="tech-stack" style="position:relative;z-index:1;padding:4rem 0;">
+        <div class="container text-center">
+            <h2 class="premium-section-title">Technology Stack</h2>
+            <p class="premium-section-subtitle">Built with industry-leading technologies</p>
+            <div>
+                <span class="tech-badge"><i class="fab fa-python text-primary"></i> Python</span>
+                <span class="tech-badge"><i class="fas fa-brain text-success"></i> Scikit-Learn</span>
+                <span class="tech-badge"><i class="fas fa-fire text-warning"></i> XGBoost</span>
+                <span class="tech-badge"><i class="fas fa-network-wired text-info"></i> TensorFlow/Keras</span>
+                <span class="tech-badge"><i class="fas fa-flask text-danger"></i> Flask</span>
+                <span class="tech-badge"><i class="fas fa-table text-primary"></i> Pandas</span>
+                <span class="tech-badge"><i class="fas fa-chart-bar text-success"></i> Plotly</span>
+                <span class="tech-badge"><i class="fab fa-bootstrap"></i> Bootstrap</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="nice-footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted">
+                        <i class="fas fa-traffic-light text-primary me-2"></i>
+                        Traffic Congestion Prediction Using AI & Machine Learning
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted small">Powered by Artificial Intelligence</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/script.js"></script>
+    <script>
+        // ============================================================
+        // 1. LIVE CLOCK
+        // ============================================================
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const secs = String(now.getSeconds()).padStart(2, '0');
+            const el = document.getElementById('liveTime');
+            if (el) el.textContent = hours + ':' + mins + ':' + secs;
+
+            const dateEl = document.getElementById('liveDate');
+            if (dateEl) {
+                const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateEl.textContent = now.toLocaleDateString('en-US', opts);
+            }
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // ============================================================
+        // 2. CONGESTION GAUGE
+        // ============================================================
+        async function updateGauge() {
+            try {
+                const res = await fetch('/api/trends');
+                const data = await res.json();
+                if (!data.current_prediction) return;
+
+                const level = data.current_prediction.avg_congestion;
+                const label = data.current_prediction.label;
+                const maxLevel = 3;
+                const pct = Math.min(level / maxLevel * 100, 100);
+
+                // Rotation: -90deg (empty) to 90deg (full)
+                const rotation = -90 + (pct / 100) * 180;
+
+                const needle = document.getElementById('gaugeNeedle');
+                if (needle) needle.style.transform = 'translateX(-50%) rotate(' + rotation + 'deg)';
+
+                const fill = document.getElementById('gaugeFill');
+                if (fill) {
+                    // Clip based on percentage
+                    const bottomPct = 100 - pct;
+                    fill.style.clipPath = 'polygon(50% 100%, 0 100%, 0 ' + bottomPct + '%, 100% ' + bottomPct + '%, 100% 100%)';
+                }
+
+                const valEl = document.getElementById('gaugeValue');
+                if (valEl) {
+                    const colors = ['#10b981', '#eab308', '#f59e0b', '#dc2626'];
+                    const color = colors[Math.min(Math.floor(level), 3)] || '#10b981';
+                    valEl.textContent = level.toFixed(2);
+                    valEl.style.color = color;
+                }
+
+                const labelEl = document.getElementById('gaugeLabel');
+                if (labelEl) labelEl.textContent = label;
+            } catch (e) {
+                console.log('Gauge update error:', e);
+            }
+        }
+        updateGauge();
+        setInterval(updateGauge, 30000);
+
+        // ============================================================
+        // 3. MODEL STATUS
+        // ============================================================
+        async function loadModelStatus() {
+            try {
+                const res = await fetch('/api/health');
+                const data = await res.json();
+                const container = document.getElementById('modelStatusList');
+
+                const models = data.models_available || [];
+                const loaded = data.models_loaded;
+
+                if (models.length > 0) {
+                    const modelIcons = {
+                        'random_forest': '<i class="fas fa-tree"></i>',
+                        'xgboost': '<i class="fas fa-bolt"></i>',
+                        'lstm': '<i class="fas fa-network-wired"></i>',
+                        'linear_regression': '<i class="fas fa-chart-line"></i>',
+                        'ensemble': '<i class="fas fa-cubes"></i>'
+                    };
+                    const modelShort = {
+                        'random_forest': 'Random Forest',
+                        'xgboost': 'XGBoost',
+                        'lstm': 'LSTM',
+                        'linear_regression': 'Linear Reg.',
+                        'ensemble': 'Ensemble'
+                    };
+
+                    container.innerHTML = models.map(function(m) {
+                        return '<div class="model-status-item">' +
+                            '<span class="small">' + (modelIcons[m] || '<i class="fas fa-microchip"></i>') + ' ' + (modelShort[m] || m) + '</span>' +
+                            '<span><span class="status-dot active"></span><span class="text-success" style="font-size:0.75rem;">Active</span></span>' +
+                        '</div>';
+                    }).join('');
+
+                    if (models.length > 0) {
+                        container.innerHTML += '<div class="mt-2 pt-1" style="border-top:1px solid rgba(255,255,255,0.05);">' +
+                            '<span class="small text-muted"><i class="far fa-check-circle text-success me-1"></i>' + models.length + ' models loaded</span>' +
+                        '</div>';
+                    }
+                } else {
+                    container.innerHTML = '<div class="text-center text-muted py-3 small"><i class="fas fa-info-circle me-1"></i>Heuristic mode</div>';
+                }
+            } catch (e) {
+                document.getElementById('modelStatusList').innerHTML = '<div class="text-center text-danger py-3 small"><i class="fas fa-exclamation-circle me-1"></i>Offline</div>';
+            }
+        }
+        loadModelStatus();
+
+        // ============================================================
+        // 4. TRAFFIC ALERT TICKER
+        // ============================================================
+        async function loadTicker() {
+            try {
+                const res = await fetch('/api/trends');
+                const data = await res.json();
+                const ticker = document.getElementById('tickerText');
+                if (!ticker) return;
+
+                const current = data.current_prediction || {};
+                const next = data.next_hour_prediction || {};
+                const trend = data.trend_direction || 'stable';
+
+                const trendEmoji = trend === 'increasing' ? '📈' : trend === 'decreasing' ? '📉' : '➡️';
+                const trendText = trend === 'increasing' ? 'increasing' : trend === 'decreasing' ? 'decreasing' : 'stable';
+
+                ticker.textContent = 'Current: ' + (current.label || 'Unknown') + ' congestion (' + (current.avg_congestion || '--') + ') | Next hour: ' + (next.label || 'Unknown') + ' | Trend: ' + trendEmoji + ' ' + trendText + ' | Avoid rush hours 7-9 AM & 5-7 PM | Plan your route with TrafficAI!';
+            } catch (e) {
+                const ticker = document.getElementById('tickerText');
+                if (ticker) ticker.textContent = 'Welcome to TrafficAI! Use the prediction tool to check congestion levels before you travel.';
+            }
+        }
+        loadTicker();
+        setInterval(loadTicker, 60000);
+
+        // ============================================================
+        // 5. LIVE STATS LOADER
+        // ============================================================
+        async function loadHomeStats() {
+            try {
+                const res = await fetch('/api/sample-data?n=100');
+                const data = await res.json();
+                if (data.stats) {
+                    const totalRecs = data.stats.total_records.toLocaleString();
+                    const locations = data.stats.locations;
+                    const congestionPct = ((data.stats.avg_congestion || 0) / 3 * 100).toFixed(0);
+
+                    const statsHtml =
+                        '<div class="col-md-3">' +
+                            '<div class="home-stat-card animate-in">' +
+                                '<div class="home-stat-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-database"></i></div>' +
+                                '<div class="home-stat-number">' + totalRecs + '</div>' +
+                                '<div class="home-stat-label">Data Samples</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-md-3">' +
+                            '<div class="home-stat-card animate-in">' +
+                                '<div class="home-stat-icon bg-success bg-opacity-10 text-success"><i class="fas fa-microchip"></i></div>' +
+                                '<div class="home-stat-number">4</div>' +
+                                '<div class="home-stat-label">ML Models</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-md-3">' +
+                            '<div class="home-stat-card animate-in">' +
+                                '<div class="home-stat-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-map-marker-alt"></i></div>' +
+                                '<div class="home-stat-number">' + locations + '</div>' +
+                                '<div class="home-stat-label">Locations</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-md-3">' +
+                            '<div class="home-stat-card animate-in">' +
+                                '<div class="home-stat-icon bg-info bg-opacity-10 text-info"><i class="fas fa-chart-line"></i></div>' +
+                                '<div class="home-stat-number">' + congestionPct + '%</div>' +
+                                '<div class="home-stat-label">Congestion Rate</div>' +
+                            '</div>' +
+                        '</div>';
+
+                    document.getElementById('homeStats').innerHTML = statsHtml;
+
+                    // Also update location count
+                    const locEl = document.getElementById('locationCount');
+                    if (locEl) locEl.textContent = locations;
+                }
+            } catch (e) {
+                console.log('Using default stats');
+            }
+        }
+        loadHomeStats();
+
+        // ============================================================
+        // 6. INIT PARTICLES
+        // ============================================================
+        (function initParticles() {
+            var container = document.getElementById('particlesBg');
+            if (!container) return;
+            for (var i = 0; i < 30; i++) {
+                var p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                var size = Math.random() * 3 + 1;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                p.style.animationDelay = (Math.random() * 10) + 's';
+                p.style.opacity = Math.random() * 0.3 + 0.1;
+                container.appendChild(p);
+            }
+        })();
+
+        // ============================================================
+        // 7. NAVBAR SCROLL
+        // ============================================================
+        (function() {
+            var navbar = document.querySelector('.navbar');
+            if (navbar) {
+                window.addEventListener('scroll', function() {
+                    navbar.classList.toggle('scrolled', window.scrollY > 50);
+                });
+            }
+        })();
+
+        console.log('TrafficAI Home Premium initialized');
+    </script>
+</body>
+</html>
+

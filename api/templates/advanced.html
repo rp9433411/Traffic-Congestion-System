@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Analytics - Traffic Congestion Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/premium-features.css">
+    <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="particles-bg" id="particlesBg"></div>
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-traffic-light"></i> TrafficAI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/predict"><i class="fas fa-robot"></i> Predict</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/advanced"><i class="fas fa-crown"></i> Advanced</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div style="padding: 100px 0 40px;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+                <div>
+                    <h1 class="fw-bold mb-1"><i class="fas fa-crown text-warning me-2"></i>Advanced Analytics</h1>
+                    <p class="text-muted mb-0">Premium congestion analysis with location rankings, optimal times, and forecasting</p>
+                </div>
+                <div class="d-flex gap-2 mt-2 mt-md-0">
+                    <button class="btn btn-premium btn-premium-accent btn-sm" id="autoRefreshBtn" onclick="document.getElementById('autoRefreshBtn').classList.toggle('active');loadAll();setInterval(loadAll,15000);this.onclick=null;">
+                        <i class="fas fa-sync-alt me-1"></i> Auto Refresh
+                    </button>
+                    <button class="btn btn-glass btn-sm" onclick="loadAll()">
+                        <i class="fas fa-redo me-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4" id="premiumStats"></div>
+
+            <ul class="nav nav-tabs-premium mb-4">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#loc-panel">
+                        <i class="fas fa-map-marker-alt me-2"></i>Location Rankings
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#opt-panel">
+                        <i class="fas fa-clock me-2"></i>Optimal Travel Times
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#trend-panel">
+                        <i class="fas fa-chart-line me-2"></i>Trend Forecast
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="loc-panel">
+                    <div class="row g-3">
+                        <div class="col-lg-8">
+                            <div class="chart-container-premium">
+                                <div class="chart-title"><i class="fas fa-chart-bar text-primary me-2"></i>Congestion by Location</div>
+                                <div id="locationChart" class="chart-box"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card-premium" style="height:100%;">
+                                <h5 class="fw-semibold mb-3"><i class="fas fa-trophy text-warning me-2"></i>Rankings</h5>
+                                <div id="locationRankingList" style="max-height:430px;overflow-y:auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="opt-panel">
+                    <div class="card-premium mb-3">
+                        <h5 class="fw-semibold mb-0"><i class="fas fa-lightbulb text-warning me-2"></i>Smart Travel Recommendations</h5>
+                    </div>
+                    <div id="optimalTimesContainer" class="row g-3"></div>
+                </div>
+
+                <div class="tab-pane fade" id="trend-panel">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="chart-container-premium">
+                                <div class="chart-title"><i class="fas fa-chart-line text-info me-2"></i>6-Hour Congestion Forecast</div>
+                                <div id="trendChart" class="chart-box"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-premium" id="currentStatusCard">
+                                <h5 class="fw-semibold mb-3"><i class="fas fa-circle text-success me-2"></i>Current Status</h5>
+                                <div class="text-center py-3 text-muted" id="currentStatusContent">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-premium" id="nextHourCard">
+                                <h5 class="fw-semibold mb-3"><i class="fas fa-hourglass-half text-warning me-2"></i>Next Hour</h5>
+                                <div class="text-center py-3 text-muted" id="nextHourContent">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer-premium">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0 text-muted"><i class="fas fa-traffic-light text-primary me-2"></i>Traffic Congestion Prediction AI</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted small">Premium Analytics Suite</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/script.js"></script>
+    <script>
+    async function loadAll() {
+        await Promise.all([loadPremiumStats(), loadLocationRanking(), loadOptimalTimes(), loadTrendForecast()]);
+    }
+
+    async function loadPremiumStats() {
+        try {
+            const [data, locations, trends] = await Promise.all([
+                ApiClient.getSampleData(500),
+                ApiClient.getLocationRanking(),
+                ApiClient.getTrends()
+            ]);
+            if (!data.stats) return;
+            const most = locations.rankings?.[0]?.location || 'N/A';
+            const least = locations.rankings?.[locations.rankings.length-1]?.location || 'N/A';
+            const dir = trends.trend_direction || 'stable';
+            const dirEmoji = dir === 'increasing' ? '\ud83d\udcc8' : dir === 'decreasing' ? '\ud83d\udcc9' : '\u27a1\ufe0f';
+            document.getElementById('premiumStats').innerHTML = [
+                {icon:'fa-database',color:'primary',val:data.stats.total_records.toLocaleString(),label:'Total Samples'},
+                {icon:'fa-map-marker-alt',color:'danger',val:data.stats.locations,label:'Locations'},
+                {icon:'fa-tachometer-alt',color:'success',val:most,label:'Most Congested'},
+                {icon:'fa-check-circle',color:'info',val:least,label:'Least Congested'}
+            ].map(function(s) {
+                return '<div class="col-md-3"><div class="card-premium text-center">'+
+                    '<div class="card-icon bg-'+s.color+' bg-opacity-10 text-'+s.color+' mx-auto"><i class="fas '+s.icon+'"></i></div>'+
+                    '<div class="fw-bold mt-2" style="font-size:1.3rem;">'+s.val+'</div>'+
+                    '<div class="text-muted small">'+s.label+'</div></div></div>';
+            }).join('');
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadLocationRanking() {
+        try {
+            UI.showLoading('locationChart','Loading rankings...');
+            const data = await ApiClient.getLocationRanking();
+            if (!data.rankings) return;
+            const locs = data.rankings.map(function(r){return r.location;});
+            const vals = data.rankings.map(function(r){return r.avg_congestion;});
+            const colors = vals.map(function(v){return CongestionUtils.getColor(v);});
+            ChartManager.create('locationChart', [{
+                x: vals, y: locs, type: 'bar', orientation: 'h',
+                marker: { color: colors },
+                text: vals.map(function(v){return v.toFixed(2);}),
+                textposition: 'outside', textfont: { size: 10 },
+                hovertemplate: '%{y}<br>Avg: %{x:.2f}<extra></extra>'
+            }], Object.assign(ChartManager.darkLayout('','Avg Congestion',''), {
+                margin:{t:10,r:60,b:40,l:130},showlegend:false,
+                xaxis:{range:[0,Math.max.apply(null,vals)+0.5]}
+            }));
+
+            document.getElementById('locationRankingList').innerHTML = data.rankings.map(function(r,i){
+                var c = CongestionUtils.getColor(r.avg_congestion);
+                var medal = i === 0 ? '\ud83e\udd47' : i === 1 ? '\ud83e\udd48' : i === 2 ? '\ud83e\udd49' : (i+1);
+                var cls = ['success','warning','danger','danger'][Math.min(Math.round(r.avg_congestion),3)];
+                return '<div class="d-flex align-items-center p-2 mb-1" style="background:rgba(0,0,0,0.2);border-radius:8px;border-left:3px solid '+c+';">'+
+                    '<span class="me-2 fw-bold" style="min-width:24px;">'+medal+'</span>'+
+                    '<div class="flex-grow-1"><div class="small fw-semibold">'+r.location+'</div>'+
+                    '<div class="text-muted" style="font-size:0.75rem;">Vol: '+r.avg_traffic_volume.toLocaleString()+' | '+r.avg_speed+' km/h</div></div>'+
+                    '<span class="badge-premium badge-premium-'+cls+'">'+r.congestion_label+'</span></div>';
+            }).join('');
+        } catch(e) { UI.showError('locationChart','Failed to load location rankings'); }
+    }
+
+    async function loadOptimalTimes() {
+        try {
+            var container = document.getElementById('optimalTimesContainer');
+            container.innerHTML = '<div class="col-12"><div class="text-center py-4 text-muted"><div class="spinner-premium mx-auto mb-3"></div>Analyzing optimal times...</div></div>';
+            const data = await ApiClient.getOptimalTimes();
+            if (!data.recommendations) return;
+            container.innerHTML = data.recommendations.map(function(r){
+                var c = CongestionUtils.getColor(r.congestion_level);
+                var sev = CongestionUtils.getLabel(r.congestion_level);
+                var badgeCls = sev === 'Low' ? 'success' : sev === 'Moderate' ? 'warning' : 'danger';
+                return '<div class="col-md-6"><div class="card-premium" style="border-left:3px solid '+c+';">'+
+                    '<div class="d-flex justify-content-between align-items-start mb-2">'+
+                    '<h6 class="fw-semibold mb-0"><i class="fas fa-map-marker-alt me-2" style="color:'+c+'"></i>'+r.location+'</h6>'+
+                    '<span class="badge-premium badge-premium-'+badgeCls+'">'+sev+'</span></div>'+
+                    '<div class="row g-2 small">'+
+                    '<div class="col-6"><span class="text-muted">Best Time:</span><br><span class="fw-semibold" style="color:var(--secondary);">'+r.best_time+'</span></div>'+
+                    '<div class="col-6"><span class="text-muted">Avoid:</span><br><span class="fw-semibold text-danger">'+r.worst_time+'</span></div>'+
+                    '<div class="col-6"><span class="text-muted">Volume:</span><br>'+r.traffic_volume.toLocaleString()+' veh</div>'+
+                    '<div class="col-6"><span class="text-muted">Speed:</span><br>'+r.avg_speed+' km/h</div></div>'+
+                    '<div class="mt-2"><div class="progress-custom"><div class="progress-fill" style="width:'+(r.congestion_level/3*100).toFixed(0)+'%;background:'+c+';"></div></div></div>'+
+                    '<div class="mt-1 text-end"><small class="text-muted">'+r.improvement_pct+'% less congestion at best time</small></div></div></div>';
+            }).join('');
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadTrendForecast() {
+        try {
+            UI.showLoading('trendChart','Calculating forecast...');
+            const data = await ApiClient.getTrends();
+            if (!data.trend) return;
+
+            var hours = data.trend.map(function(t){return t.hour+':00';});
+            var vals = data.trend.map(function(t){return t.predicted_congestion;});
+            var colors = vals.map(function(v){return CongestionUtils.getColor(v);});
+
+            ChartManager.create('trendChart', [{
+                x: hours, y: vals, type: 'scatter', mode: 'lines+markers',
+                line: { color: '#2563eb', width: 3, shape: 'spline' },
+                marker: { size: 12, color: colors, line: {color:'white',width:2} },
+                fill: 'tozeroy', fillcolor: 'rgba(37,99,235,0.1)',
+                hovertemplate: '%{x}<br>Predicted: %{y:.2f}<extra></extra>'
+            }], Object.assign(ChartManager.darkLayout('','Time','Predicted Congestion'), {
+                margin:{t:10,r:20,b:50,l:60},showlegend:false,
+                yaxis:{range:[0,Math.max.apply(null,vals)+0.5]},
+                shapes: [{
+                    type: 'line', x0: hours[0], x1: hours[hours.length-1],
+                    y0: 1.5, y1: 1.5, line: { color: 'rgba(255,255,255,0.1)', width: 1, dash: 'dash' }
+                }]
+            }));
+
+            if (data.current_prediction) {
+                var cur = data.current_prediction;
+                var curColor = CongestionUtils.getColor(cur.avg_congestion);
+                document.getElementById('currentStatusContent').innerHTML =
+                    '<div style="font-size:2.5rem;font-weight:800;color:'+curColor+';">'+cur.avg_congestion.toFixed(2)+'</div>'+
+                    '<div class="fw-semibold" style="color:'+curColor+';">'+cur.label+'</div>'+
+                    '<div class="text-muted small mt-1">Hour: '+cur.hour+':00</div>';
+            }
+            if (data.next_hour_prediction) {
+                var next = data.next_hour_prediction;
+                var nextColor = CongestionUtils.getColor(next.avg_congestion);
+                document.getElementById('nextHourContent').innerHTML =
+                    '<div style="font-size:2.5rem;font-weight:800;color:'+nextColor+';">'+next.avg_congestion.toFixed(2)+'</div>'+
+                    '<div class="fw-semibold" style="color:'+nextColor+';">'+next.label+'</div>'+
+                    '<div class="text-muted small mt-1">Hour: '+next.hour+':00</div>'+
+                    '<div class="mt-2 small text-muted">Trend: '+data.trend_direction+'</div>';
+            }
+        } catch(e) { UI.showError('trendChart','Failed to load forecast'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAll);
+    </script>
+</body>
+</html>
+
