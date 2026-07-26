@@ -1,5 +1,6 @@
 """
 Flask API Server for Traffic Congestion Prediction System.
+Deployed on Vercel - Serverless compatible.
 
 Provides:
 - Web interface for congestion prediction
@@ -15,9 +16,12 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
+import traceback
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+_root = str(Path(__file__).resolve().parent.parent)
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -30,7 +34,7 @@ app = Flask(__name__, static_folder=STATIC_DIR, static_url_path='/static')
 CORS(app)
 app.config['SECRET_KEY'] = API_CONFIG.get('secret_key', 'traffic-prediction-key')
 
-# Initialize predictor
+# ============== Vercel-compatible startup ==============
 predictor = CongestionPredictor()
 
 # Try to load models, fall back to heuristic
@@ -39,7 +43,7 @@ try:
     print("✓ Models loaded successfully")
 except Exception as e:
     print(f"⚠ Could not load models: {e}")
-    print("  Using heuristic prediction fallback")
+    print("  Using heuristic prediction fallback (Vercel compatible mode)")
 
 
 def _convert_weather(weather_str):

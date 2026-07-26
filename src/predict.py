@@ -69,7 +69,11 @@ class CongestionPredictor:
             if os.path.exists(filepath):
                 try:
                     if filename.endswith('.h5'):
-                        from tensorflow.keras.models import load_model
+                        try:
+                            from tensorflow.keras.models import load_model
+                        except ImportError:
+                            print(f"  - TensorFlow not installed, skipping {name}")
+                            continue
                         os.environ['TF_USE_LEGACY_KERAS'] = '1'
                         try:
                             self.models[name] = load_model(filepath, compile=False)
