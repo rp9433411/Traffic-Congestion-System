@@ -16,11 +16,16 @@ API_DIR = BASE_DIR / 'api'
 STATIC_DIR = BASE_DIR / 'static'
 TEMPLATES_DIR = API_DIR / 'templates'
 
-# Ensure directories exist
-for dir_path in [DATA_DIR, MODELS_DIR, OUTPUT_DIR, NOTEBOOKS_DIR, 
-                 SRC_DIR, API_DIR, STATIC_DIR, TEMPLATES_DIR,
-                 STATIC_DIR / 'css', STATIC_DIR / 'js']:
-    dir_path.mkdir(parents=True, exist_ok=True)
+# Ensure directories exist (skip on Vercel read-only filesystem)
+_vercel = os.environ.get('VERCEL', '') == '1'
+if not _vercel:
+    for dir_path in [DATA_DIR, MODELS_DIR, OUTPUT_DIR, NOTEBOOKS_DIR,
+                     SRC_DIR, API_DIR, STATIC_DIR, TEMPLATES_DIR,
+                     STATIC_DIR / 'css', STATIC_DIR / 'js']:
+        try:
+            dir_path.mkdir(parents=True, exist_ok=True)
+        except (PermissionError, OSError):
+            pass
 
 # Data Generation Settings
 DATA_GENERATION = {
@@ -104,7 +109,7 @@ API_CONFIG = {
 # Congestion Levels Mapping
 CONGESTION_LEVELS = {
     0: 'Low',
-    1: 'Moderate', 
+    1: 'Moderate',
     2: 'High',
     3: 'Severe'
 }
@@ -127,3 +132,5 @@ WEATHER_CONDITIONS = {
     5: 'Snowy'
 }
 
+</｜｜DSML｜｜parameter>
+</create_file>
